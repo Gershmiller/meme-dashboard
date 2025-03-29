@@ -15,27 +15,72 @@ const API_ENDPOINTS = {
  * @param {number} count - Number of memes to fetch
  * @returns {Promise} - Promise that resolves to meme data
  */
+/**
+ * Fetch memes from the Meme API with fallback to sample data
+ * @param {string} subreddit - Subreddit to fetch memes from
+ * @param {number} count - Number of memes to fetch
+ * @returns {Promise} - Promise that resolves to meme data
+ */
 async function fetchMemes(subreddit = 'memes', count = 10) {
     try {
         showLoading(true);
         hideError();
         
-        const url = `${API_ENDPOINTS.MEME_API}/${subreddit}/${count}`;
-        const response = await fetch(url);
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
+        // Try to fetch from real API first
+        try {
+            // Add CORS proxy to the URL
+            const corsProxy = 'https://corsproxy.io/?';
+            const url = `${corsProxy}${API_ENDPOINTS.MEME_API}/${subreddit}/${count}`;
+            const response = await fetch(url) ;
+            
+            if (response.ok) {
+                const data = await response.json();
+                
+                // Check if we actually got memes back
+                if (data.memes && data.memes.length > 0) {
+                    showLoading(false);
+                    showStatus(`Successfully loaded ${data.memes.length} memes from Reddit`);
+                    return data;
+                }
+            }
+            // If we get here, the API request failed or returned no memes
+            throw new Error('API request failed or returned no memes');
+        } catch (apiError) {
+            console.log('API request failed, falling back to sample data:', apiError);
+            
+            // Fall back to sample data
+            const response = await fetch('sample-memes.json');
+            
+            if (!response.ok) {
+                throw new Error(`Failed to load sample data: ${response.status}`);
+            }
+            
+            const allData = await response.json();
+            
+            // Filter by subreddit if needed
+            let filteredMemes = allData.memes;
+            if (subreddit !== 'all') {
+                filteredMemes = allData.memes.filter(meme => 
+                    meme.subreddit.toLowerCase() === subreddit.toLowerCase()
+                );
+                
+                // If no memes match the subreddit, return all memes
+                if (filteredMemes.length === 0) {
+                    filteredMemes = allData.memes;
+                }
+            }
+            
+            // Limit to requested count
+            const limitedMemes = filteredMemes.slice(0, count);
+            
+            const data = {
+                memes: limitedMemes
+            };
+            
+            showLoading(false);
+            showStatus(`Using sample memes (API unavailable)`);
+            return data;
         }
-        
-        const data = await response.json();
-        
-        // Check if we actually got memes back
-        if (!data.memes || data.memes.length === 0) {
-            throw new Error('No memes found. Try a different subreddit.');
-        }
-        
-        showLoading(false);
-        return data;
     } catch (error) {
         showLoading(false);
         showError(`Failed to fetch memes: ${error.message}`);
@@ -43,6 +88,7 @@ async function fetchMemes(subreddit = 'memes', count = 10) {
         return { memes: [] };
     }
 }
+
 
 
 /**
