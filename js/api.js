@@ -18,61 +18,62 @@ async function fetchMemes(subreddit = 'memes', count = 10)  {
         showLoading(true);
         hideError();
         
-        // Sample data directly in the code (no external file needed)
-        const sampleData = {
-            "memes": [
-                {
-                    "postLink": "https://reddit.com/r/memes/sample1",
-                    "subreddit": "memes",
-                    "title": "When you finally understand JavaScript",
-                    "url": "https://i.imgur.com/G9h4VYb.jpeg",
-                    "nsfw": false,
-                    "spoiler": false,
-                    "author": "CodeMaster",
-                    "ups": 5280
-                },
-                {
-                    "postLink": "https://reddit.com/r/memes/sample2",
-                    "subreddit": "memes",
-                    "title": "Working from home be like",
-                    "url": "https://i.imgur.com/lz8eBN9.jpeg",
-                    "nsfw": false,
-                    "spoiler": false,
-                    "author": "RemoteWorker",
-                    "ups": 4720
-                },
-                {
-                    "postLink": "https://reddit.com/r/dankmemes/sample3",
-                    "subreddit": "dankmemes",
-                    "title": "Every time I try to fix a bug",
-                    "url": "https://i.imgur.com/oFt6JgI.jpeg",
-                    "nsfw": false,
-                    "spoiler": false,
-                    "author": "BugHunter",
-                    "ups": 8340
-                },
-                {
-                    "postLink": "https://reddit.com/r/ProgrammerHumor/sample4",
-                    "subreddit": "ProgrammerHumor",
-                    "title": "CSS positioning explained",
-                    "url": "https://i.imgur.com/MvzgS0p.jpeg",
-                    "nsfw": false,
-                    "spoiler": false,
-                    "author": "CSSWizard",
-                    "ups": 6210
-                },
-                {
-                    "postLink": "https://reddit.com/r/memes/sample5",
-                    "subreddit": "memes",
-                    "title": "When the code works on the first try",
-                    "url": "https://i.imgur.com/lFnIHmv.jpeg",
-                    "nsfw": false,
-                    "spoiler": false,
-                    "author": "LuckyDev",
-                    "ups": 9150
-                }
-            ]
-        };
+       // Sample data directly in the code (no external file needed)
+const sampleData = {
+    "memes": [
+        {
+            "postLink": "https://reddit.com/r/memes/sample1",
+            "subreddit": "memes",
+            "title": "When you finally understand JavaScript",
+            "url": "https://i.imgflip.com/7q7cxk.jpg",
+            "nsfw": false,
+            "spoiler": false,
+            "author": "CodeMaster",
+            "ups": 5280
+        },
+        {
+            "postLink": "https://reddit.com/r/memes/sample2",
+            "subreddit": "memes",
+            "title": "Working from home be like",
+            "url": "https://i.imgflip.com/7q7d1g.jpg",
+            "nsfw": false,
+            "spoiler": false,
+            "author": "RemoteWorker",
+            "ups": 4720
+        },
+        {
+            "postLink": "https://reddit.com/r/dankmemes/sample3",
+            "subreddit": "dankmemes",
+            "title": "Every time I try to fix a bug",
+            "url": "https://i.imgflip.com/7q7d5i.jpg",
+            "nsfw": false,
+            "spoiler": false,
+            "author": "BugHunter",
+            "ups": 8340
+        },
+        {
+            "postLink": "https://reddit.com/r/ProgrammerHumor/sample4",
+            "subreddit": "ProgrammerHumor",
+            "title": "CSS positioning explained",
+            "url": "https://i.imgflip.com/7q7d9k.jpg",
+            "nsfw": false,
+            "spoiler": false,
+            "author": "CSSWizard",
+            "ups": 6210
+        },
+        {
+            "postLink": "https://reddit.com/r/memes/sample5",
+            "subreddit": "memes",
+            "title": "When the code works on the first try",
+            "url": "https://i.imgflip.com/7q7dds.jpg",
+            "nsfw": false,
+            "spoiler": false,
+            "author": "LuckyDev",
+            "ups": 9150
+        }
+    ]
+};
+
         
         // Filter by subreddit if needed
         let filteredMemes = sampleData.memes;
