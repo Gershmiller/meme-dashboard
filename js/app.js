@@ -11,17 +11,14 @@ let currentSort = 'ups';
 let currentFormat = 'all';
 
 // DOM elements
+const loadMemesButton = document.getElementById('load-memes');
 const themeToggle = document.getElementById('theme-toggle');
-const refreshButton = document.getElementById('refresh-data');
 const subredditFilter = document.getElementById('subreddit-filter');
 const countFilter = document.getElementById('count-filter');
-const sortFilter = document.getElementById('sort-filter');
-const formatFilter = document.getElementById('format-filter');
-const loadMoreButton = document.getElementById('load-more');
-const exportCsvButton = document.getElementById('export-csv');
-const takeScreenshotButton = document.getElementById('take-screenshot');
 const galleryViewButton = document.getElementById('gallery-view-btn');
 const listViewButton = document.getElementById('list-view-btn');
+const exportCsvButton = document.getElementById('export-csv');
+const takeScreenshotButton = document.getElementById('take-screenshot');
 
 /**
  * Initialize the application
@@ -45,9 +42,9 @@ function setupEventListeners() {
         themeToggle.addEventListener('click', toggleTheme);
     }
     
-    // Refresh button
-    if (refreshButton) {
-        refreshButton.addEventListener('click', () => loadMemeData());
+    // Load memes button
+    if (loadMemesButton) {
+        loadMemesButton.addEventListener('click', () => loadMemeData());
     }
     
     // Filters
@@ -59,17 +56,13 @@ function setupEventListeners() {
         countFilter.addEventListener('change', handleFilterChange);
     }
     
-    if (sortFilter) {
-        sortFilter.addEventListener('change', handleSortChange);
+    // View toggle buttons
+    if (galleryViewButton) {
+        galleryViewButton.addEventListener('click', () => toggleGalleryView('grid'));
     }
     
-    if (formatFilter) {
-        formatFilter.addEventListener('change', handleFormatChange);
-    }
-    
-    // Load more button
-    if (loadMoreButton) {
-        loadMoreButton.addEventListener('click', loadMoreMemes);
+    if (listViewButton) {
+        listViewButton.addEventListener('click', () => toggleGalleryView('list'));
     }
     
     // Export buttons
@@ -80,18 +73,8 @@ function setupEventListeners() {
     if (takeScreenshotButton) {
         takeScreenshotButton.addEventListener('click', () => {
             console.log("Screenshot button clicked");
-            // Simplified version without actual screenshot functionality
             alert("Screenshot feature would capture the current view");
         });
-    }
-    
-    // View toggle buttons
-    if (galleryViewButton) {
-        galleryViewButton.addEventListener('click', () => toggleGalleryView('grid'));
-    }
-    
-    if (listViewButton) {
-        listViewButton.addEventListener('click', () => toggleGalleryView('list'));
     }
 }
 
@@ -137,35 +120,6 @@ function handleFilterChange() {
     if (countFilter) {
         currentCount = parseInt(countFilter.value);
     }
-    
-    // Reload data
-    loadMemeData();
-}
-
-/**
- * Handle sort changes
- */
-function handleSortChange() {
-    if (sortFilter) {
-        currentSort = sortFilter.value;
-    }
-    
-    // Apply sort to existing data
-    applyFiltersAndSort();
-    updateDashboard();
-}
-
-/**
- * Handle format filter changes
- */
-function handleFormatChange() {
-    if (formatFilter) {
-        currentFormat = formatFilter.value;
-    }
-    
-    // Apply filter to existing data
-    applyFiltersAndSort();
-    updateDashboard();
 }
 
 /**
@@ -217,45 +171,14 @@ async function loadMemeData() {
 }
 
 /**
- * Load more memes
- */
-async function loadMoreMemes() {
-    try {
-        const data = await fetchMemes(currentSubreddit, currentCount);
-        
-        if (data && data.memes && data.memes.length > 0) {
-            // Add new memes to existing collection
-            allMemes = [...allMemes, ...data.memes];
-            
-            // Apply filters and sort
-            applyFiltersAndSort();
-            
-            // Update dashboard
-            updateDashboard();
-        }
-    } catch (error) {
-        console.error('Error loading more memes:', error);
-    }
-}
-
-/**
  * Apply filters and sort to meme data
  */
 function applyFiltersAndSort() {
     // Apply format filter
-    if (currentFormat === 'all') {
-        filteredMemes = [...allMemes];
-    } else {
-        filteredMemes = allMemes.filter(meme => {
-            const format = detectMemeFormat(meme.url);
-            return format === currentFormat;
-        });
-    }
+    filteredMemes = [...allMemes];
     
     // Apply sort
-    if (currentSort === 'ups') {
-        filteredMemes.sort((a, b) => b.ups - a.ups);
-    }
+    filteredMemes.sort((a, b) => b.ups - a.ups);
 }
 
 /**
@@ -267,7 +190,10 @@ function updateDashboard() {
     // Update gallery
     populateMemeGallery(filteredMemes);
     
-    // Update other components if they exist
+    // Update trend spotlight
+    populateTrendSpotlight(filteredMemes);
+    
+    // Update charts if they exist
     if (typeof updateTrendChart === 'function') {
         updateTrendChart(filteredMemes);
     }
@@ -280,26 +206,27 @@ function updateDashboard() {
         updateSentimentChart(filteredMemes);
     }
     
-    if (typeof populateTrendSpotlight === 'function') {
-        populateTrendSpotlight(filteredMemes);
-    }
-    
-    if (typeof populatePopularityScores === 'function') {
-        populatePopularityScores(filteredMemes);
-    }
+    // Update popularity scores
+    populatePopularityScores(filteredMemes);
 }
 
 /**
  * Populate meme gallery with filtered memes
  * @param {Array} memes - Array of meme objects
- * @param {boolean} append - Whether to append to existing gallery
  */
-function populateMemeGallery(memes, append = false) {
+function populateMemeGallery(memes) {
     const galleryContainer = document.getElementById('meme-gallery');
     if (!galleryContainer) return;
     
-    if (!append) {
-        galleryContainer.innerHTML = '';
+    galleryContainer.innerHTML = '';
+    
+    if (memes.length === 0) {
+        galleryContainer.innerHTML = `
+            <div class="col-12 text-center py-5">
+                <p class="text-muted">No memes found matching your criteria.</p>
+            </div>
+        `;
+        return;
     }
     
     memes.forEach(meme => {
@@ -308,7 +235,7 @@ function populateMemeGallery(memes, append = false) {
         
         memeCard.innerHTML = `
             <div class="card h-100 shadow-sm">
-                <img src="${meme.url}" class="card-img-top gallery-img" alt="${meme.title}">
+                <img src="${meme.url}" class="card-img-top gallery-img" alt="${meme.title}" onerror="this.src='https://via.placeholder.com/400x300.png?text=Image+Not+Available'">
                 <div class="card-body">
                     <h5 class="card-title">${meme.title}</h5>
                     <p class="card-text">
@@ -318,20 +245,84 @@ function populateMemeGallery(memes, append = false) {
             </div>
         `;
         
-        memeCard.addEventListener('click', () => {
+        memeCard.addEventListener('click', ()  => {
             showMemeModal(meme);
         });
         
         galleryContainer.appendChild(memeCard);
     });
+}
+
+/**
+ * Populate trend spotlight with top memes
+ * @param {Array} memes - Array of meme objects
+ */
+function populateTrendSpotlight(memes) {
+    const spotlightContainer = document.getElementById('trend-spotlight');
+    if (!spotlightContainer) return;
     
-    if (memes.length === 0) {
-        galleryContainer.innerHTML = `
-            <div class="col-12 text-center py-5">
-                <p class="text-muted">No memes found matching your criteria.</p>
+    spotlightContainer.innerHTML = '';
+    
+    // Get top 3 memes
+    const topMemes = memes.slice(0, 3);
+    
+    topMemes.forEach(meme => {
+        const memeCol = document.createElement('div');
+        memeCol.className = 'col-md-4 mb-3';
+        
+        memeCol.innerHTML = `
+            <div class="card h-100">
+                <img src="${meme.url}" class="card-img-top spotlight-img" alt="${meme.title}" onerror="this.src='https://via.placeholder.com/400x300.png?text=Image+Not+Available'">
+                <div class="card-body">
+                    <h6 class="card-title">${meme.title}</h6>
+                    <p class="card-text">
+                        <small class="text-muted">r/${meme.subreddit} • ${meme.ups} upvotes</small>
+                    </p>
+                </div>
             </div>
         `;
-    }
+        
+        spotlightContainer.appendChild(memeCol) ;
+    });
+}
+
+/**
+ * Populate popularity scores
+ * @param {Array} memes - Array of meme objects
+ */
+function populatePopularityScores(memes) {
+    const scoresContainer = document.getElementById('popularity-scores');
+    if (!scoresContainer) return;
+    
+    scoresContainer.innerHTML = '';
+    
+    // Get top 5 memes by upvotes
+    const topMemes = memes.slice(0, 5);
+    
+    // Create a list group
+    const listGroup = document.createElement('ul');
+    listGroup.className = 'list-group';
+    
+    topMemes.forEach((meme, index) => {
+        const listItem = document.createElement('li');
+        listItem.className = 'list-group-item d-flex justify-content-between align-items-center';
+        
+        // Calculate a normalized score out of 100
+        const maxUps = topMemes[0].ups;
+        const normalizedScore = Math.round((meme.ups / maxUps) * 100);
+        
+        listItem.innerHTML = `
+            <div>
+                <span class="badge bg-primary rounded-pill me-2">${index + 1}</span>
+                ${meme.title}
+            </div>
+            <span class="badge bg-success rounded-pill">${normalizedScore}</span>
+        `;
+        
+        listGroup.appendChild(listItem);
+    });
+    
+    scoresContainer.appendChild(listGroup);
 }
 
 /**
@@ -341,14 +332,13 @@ function populateMemeGallery(memes, append = false) {
 function showMemeModal(meme) {
     const modalTitle = document.getElementById('meme-modal-title');
     const modalBody = document.getElementById('meme-modal-body');
-    const modal = new bootstrap.Modal(document.getElementById('meme-modal'));
     
     if (!modalTitle || !modalBody) return;
     
     modalTitle.textContent = meme.title;
     
     modalBody.innerHTML = `
-        <img src="${meme.url}" class="img-fluid mb-3" alt="${meme.title}">
+        <img src="${meme.url}" class="img-fluid mb-3" alt="${meme.title}" onerror="this.src='https://via.placeholder.com/400x300.png?text=Image+Not+Available'">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <span class="badge bg-primary">r/${meme.subreddit}</span>
             <span><i class="bi bi-arrow-up-circle"></i> ${meme.ups} upvotes</span>
@@ -357,6 +347,7 @@ function showMemeModal(meme) {
         <a href="${meme.postLink}" target="_blank" class="btn btn-outline-primary">View on Reddit</a>
     `;
     
+    const modal = new bootstrap.Modal(document.getElementById('meme-modal') );
     modal.show();
 }
 
@@ -369,37 +360,30 @@ function exportToCSV() {
         return;
     }
     
-    if (typeof convertToCSV !== 'function' || typeof downloadCSV !== 'function') {
-        alert('Export functionality not available');
-        return;
-    }
+    // Create CSV content
+    let csvContent = 'data:text/csv;charset=utf-8,';
+    csvContent += 'Title,Subreddit,Author,Upvotes,URL\n';
     
-    const csvContent = convertToCSV(filteredMemes);
-    const filename = `meme-data-${currentSubreddit}-${new Date().toISOString().split('T')[0]}.csv`;
+    filteredMemes.forEach(meme => {
+        csvContent += `"${meme.title.replace(/"/g, '""')}",`;
+        csvContent += `${meme.subreddit},`;
+        csvContent += `${meme.author},`;
+        csvContent += `${meme.ups},`;
+        csvContent += `${meme.url}\n`;
+    });
     
-    downloadCSV(csvContent, filename);
-}
-
-/**
- * Detect meme format from URL
- * @param {string} url - Meme URL
- * @returns {string} - Format (image, gif, video)
- */
-function detectMemeFormat(url) {
-    if (!url) return 'unknown';
+    // Create download link
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `meme-data-${currentSubreddit}-${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
     
-    const lowercaseUrl = url.toLowerCase();
+    // Trigger download
+    link.click();
     
-    if (lowercaseUrl.endsWith('.gif')) {
-        return 'gif';
-    } else if (lowercaseUrl.endsWith('.mp4') || lowercaseUrl.endsWith('.webm')) {
-        return 'video';
-    } else if (lowercaseUrl.endsWith('.jpg') || lowercaseUrl.endsWith('.jpeg') || 
-               lowercaseUrl.endsWith('.png') || lowercaseUrl.endsWith('.webp')) {
-        return 'image';
-    } else {
-        return 'image'; // Default to image
-    }
+    // Clean up
+    document.body.removeChild(link);
 }
 
 // Initialize app when DOM is loaded

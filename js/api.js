@@ -2,9 +2,9 @@
  * API interaction for the Meme Trend Dashboard
  */
 
+// API endpoints
 const API_ENDPOINTS = {
-    MEME_API: 'https://meme-api.com/gimme',
-    MEMEGEN_API: 'https://api.memegen.link'
+    REDDIT_JSON: 'https://www.reddit.com/r/'
 };
 
 /**
@@ -13,16 +13,16 @@ const API_ENDPOINTS = {
  * @param {number} count - Number of memes to fetch
  * @returns {Promise} - Promise that resolves to meme data
  */
-async function fetchMemes(subreddit = 'memes', count = 10) {
+async function fetchMemes(subreddit = 'memes', count = 10)  {
     try {
         showLoading(true);
         hideError();
         
         // Use Reddit's JSON API directly (no authentication needed for public data)
-        const url = `https://www.reddit.com/r/${subreddit}/hot.json?limit=${count}`;
+        const url = `${API_ENDPOINTS.REDDIT_JSON}${subreddit}/hot.json?limit=${count}`;
         
         // Add a timestamp to prevent caching
-        const nocacheUrl = `${url}&_=${new Date() .getTime()}`;
+        const nocacheUrl = `${url}&_=${new Date().getTime()}`;
         
         const response = await fetch(nocacheUrl);
         
@@ -135,53 +135,6 @@ async function fetchMemes(subreddit = 'memes', count = 10) {
     }
 }
 
-        
-        // Filter by subreddit if needed
-        let filteredMemes = sampleData.memes;
-        if (subreddit !== 'all')  {
-            filteredMemes = sampleData.memes.filter(meme => 
-                meme.subreddit.toLowerCase() === subreddit.toLowerCase()
-            );
-            
-            // If no memes match the subreddit, return all memes
-            if (filteredMemes.length === 0) {
-                filteredMemes = sampleData.memes;
-            }
-        }
-        
-        // Limit to requested count
-        const limitedMemes = filteredMemes.slice(0, count);
-        
-        const data = {
-            memes: limitedMemes
-        };
-        
-        showLoading(false);
-        showStatus(`Loaded ${limitedMemes.length} sample memes`);
-        return data;
-    } catch (error) {
-        showLoading(false);
-        showError(`Failed to fetch memes: ${error.message}`);
-        console.error('Error fetching memes:', error);
-        return { memes: [] };
-    }
-}
-
-/**
- * Fetch a single random meme
- * @param {string} subreddit - Subreddit to fetch meme from
- * @returns {Promise} - Promise that resolves to meme data
- */
-async function fetchRandomMeme(subreddit = 'memes') {
-    try {
-        const data = await fetchMemes(subreddit, 1);
-        return data.memes[0];
-    } catch (error) {
-        console.error('Error fetching random meme:', error);
-        return null;
-    }
-}
-
 /**
  * Show loading indicator
  * @param {boolean} isLoading - Whether loading is in progress
@@ -253,3 +206,4 @@ function hideStatus() {
         statusAlert.classList.add('d-none');
     }
 }
+

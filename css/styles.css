@@ -1,16 +1,23 @@
-/* Custom styles for Meme Trend Dashboard */
+/* Main styles for Meme Trend Dashboard */
 
 /* General styles */
 body {
-    transition: background-color 0.3s ease, color 0.3s ease;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    padding-bottom: 2rem;
 }
 
 /* Card styles */
 .card {
-    transition: background-color 0.3s ease, border-color 0.3s ease;
+    border-radius: 0.5rem;
+    transition: transform 0.2s, box-shadow 0.2s;
 }
 
-/* Image styles */
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Gallery styles */
 .gallery-img {
     height: 200px;
     object-fit: cover;
@@ -21,110 +28,38 @@ body {
     object-fit: cover;
 }
 
-/* Hover effects */
-.meme-item .card {
+.meme-item {
     cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.meme-item .card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+/* Chart styles */
+canvas {
+    max-width: 100%;
 }
 
-/* Attribution watermark */
-.watermark {
-    position: fixed;
-    bottom: 10px;
-    right: 10px;
-    opacity: 0.7;
-    font-size: 12px;
-    z-index: 1000;
-    pointer-events: none;
+/* Navigation styles */
+.navbar {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 }
 
-/* Loading animation */
+.nav-link.active {
+    font-weight: 600;
+    color: #0d6efd !important;
+}
+
+/* Button styles */
+.btn-outline-primary:not(.active):hover {
+    background-color: rgba(13, 110, 253, 0.1);
+    color: #0d6efd;
+}
+
+/* Section styles */
+section {
+    scroll-margin-top: 70px;
+}
+
+/* Loading indicator */
 .spinner-border {
     width: 3rem;
     height: 3rem;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .gallery-img {
-        height: 160px;
-    }
-    
-    .spotlight-img {
-        height: 140px;
-    }
-}
-/* Improved mobile responsiveness */
-@media (max-width: 768px) {
-    .navbar-brand {
-        font-size: 1rem;
-    }
-    
-    h2 {
-        font-size: 1.5rem;
-        margin-bottom: 1rem;
-    }
-    
-    .card-title {
-        font-size: 1rem;
-    }
-    
-    .gallery-img {
-        height: 140px;
-    }
-    
-    .spotlight-img {
-        height: 120px;
-    }
-    
-    .container {
-        padding-left: 10px;
-        padding-right: 10px;
-    }
-    
-    .btn {
-        padding: 0.25rem 0.5rem;
-        font-size: 0.875rem;
-    }
-}
-
-/* Make meme cards more interactive */
-.meme-item .card {
-    cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    margin-bottom: 1rem;
-}
-
-.meme-item .card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-}
-
-/* Improve loading indicator visibility */
-#loading-indicator {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: rgba(255, 255, 255, 0.8);
-    padding: 2rem;
-    border-radius: 0.5rem;
-    z-index: 1000;
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-}
-
-/* Add a subtle watermark */
-.watermark {
-    position: fixed;
-    bottom: 10px;
-    right: 10px;
-    opacity: 0.7;
-    font-size: 12px;
-    z-index: 1000;
-    pointer-events: none;
 }
