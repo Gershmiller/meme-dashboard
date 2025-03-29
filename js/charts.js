@@ -12,51 +12,56 @@ let sentimentChart = null;
  * @param {Array} memes - Array of meme objects
  */
 function updateTrendChart(memes) {
-    const ctx = document.getElementById('trend-chart');
-    if (!ctx) return;
+    const container = document.getElementById('trend-chart').parentElement;
+    if (!container) return;
     
-    // Destroy existing chart if it exists
-    if (trendChart) {
-        trendChart.destroy();
-    }
+    // Clear existing chart
+    container.innerHTML = '';
     
-    // Sort memes by upvotes (descending)
-    const sortedMemes = [...memes].sort((a, b) => b.ups - a.ups);
+    // Calculate metrics
+    const avgUpvotes = Math.round(memes.reduce((sum, meme) => sum + meme.ups, 0) / memes.length);
     
-    // Take top 5 memes
-    const topMemes = sortedMemes.slice(0, 5);
-    
-    // Prepare data
-    const labels = topMemes.map(meme => {
-        // Truncate long titles
-        return meme.title.length > 20 ? meme.title.substring(0, 20) + '...' : meme.title;
+    // Count subreddits
+    const subredditCounts = {};
+    memes.forEach(meme => {
+        subredditCounts[meme.subreddit] = (subredditCounts[meme.subreddit] || 0) + 1;
     });
+    const mostActiveSubreddit = Object.entries(subredditCounts)
+        .sort((a, b) => b[1] - a[1])[0][0];
     
-    const data = topMemes.map(meme => meme.ups);
+    // Get top meme
+    const topMeme = [...memes].sort((a, b) => b.ups - a.ups)[0];
     
-    // Create chart
-    trendChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Upvotes',
-                data: data,
-                backgroundColor: 'rgba(54, 162, 235, 0.7)',
-                borderColor: 'rgba(54, 162, 235, 1)',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
+    // Create metric cards
+    container.innerHTML = `
+        <div class="row g-3">
+            <div class="col-md-6">
+                <div class="card h-100 bg-light">
+                    <div class="card-body text-center">
+                        <h6 class="card-subtitle mb-2 text-muted">Average Upvotes</h6>
+                        <h3 class="card-title">${avgUpvotes.toLocaleString()}</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card h-100 bg-light">
+                    <div class="card-body text-center">
+                        <h6 class="card-subtitle mb-2 text-muted">Most Active Subreddit</h6>
+                        <h3 class="card-title">r/${mostActiveSubreddit}</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="card h-100 bg-light">
+                    <div class="card-body text-center">
+                        <h6 class="card-subtitle mb-2 text-muted">Top Meme</h6>
+                        <h5 class="card-title">${topMeme.title}</h5>
+                        <p class="mb-0">${topMeme.ups.toLocaleString()} upvotes</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
 }
 
 /**
