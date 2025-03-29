@@ -18,7 +18,7 @@ async function fetchMemes(subreddit = 'memes', count = 10)  {
         showLoading(true);
         hideError();
         
-       // Sample data directly in the code (no external file needed)
+      // Sample data directly in the code (no external file needed)
 const sampleData = {
     "memes": [
         {
