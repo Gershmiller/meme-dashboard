@@ -26,99 +26,73 @@ const listViewButton = document.getElementById('list-view-btn');
 /**
  * Initialize the application
  */
-/**
- * Show status message
- * @param {string} message - Status message to display
- */
-function showStatus(message) {
-    const statusAlert = document.getElementById('status-indicator');
-    const statusMessage = document.getElementById('status-message');
+function initApp() {
+    console.log("Initializing app...");
     
-    statusMessage.textContent = message;
-    statusAlert.classList.remove('d-none');
+    // Set up event listeners
+    setupEventListeners();
     
-    // Auto-hide after 3 seconds
-    setTimeout(() => {
-        statusAlert.classList.add('d-none');
-    }, 3000);
+    // Load initial data
+    loadMemeData();
 }
-
-/**
- * Hide status message
- */
-function hideStatus() {
-    const statusAlert = document.getElementById('status-indicator');
-    statusAlert.classList.add('d-none');
-}
-
 
 /**
  * Set up event listeners
  */
 function setupEventListeners() {
     // Theme toggle
-    themeToggle.addEventListener('click', toggleTheme);
+    if (themeToggle) {
+        themeToggle.addEventListener('click', toggleTheme);
+    }
     
     // Refresh button
-    refreshButton.addEventListener('click', () => loadMemeData());
+    if (refreshButton) {
+        refreshButton.addEventListener('click', () => loadMemeData());
+    }
     
     // Filters
-    subredditFilter.addEventListener('change', handleFilterChange);
-    countFilter.addEventListener('change', handleFilterChange);
-    sortFilter.addEventListener('change', handleSortChange);
-    formatFilter.addEventListener('change', handleFormatChange);
+    if (subredditFilter) {
+        subredditFilter.addEventListener('change', handleFilterChange);
+    }
+    
+    if (countFilter) {
+        countFilter.addEventListener('change', handleFilterChange);
+    }
+    
+    if (sortFilter) {
+        sortFilter.addEventListener('change', handleSortChange);
+    }
+    
+    if (formatFilter) {
+        formatFilter.addEventListener('change', handleFormatChange);
+    }
     
     // Load more button
-    loadMoreButton.addEventListener('click', loadMoreMemes);
+    if (loadMoreButton) {
+        loadMoreButton.addEventListener('click', loadMoreMemes);
+    }
     
     // Export buttons
-    exportCsvButton.addEventListener('click', exportToCSV);
-    takeScreenshotButton.addEventListener('click', () => takeScreenshot('trending', 'meme-trends.png'));
+    if (exportCsvButton) {
+        exportCsvButton.addEventListener('click', exportToCSV);
+    }
+    
+    if (takeScreenshotButton) {
+        takeScreenshotButton.addEventListener('click', () => {
+            console.log("Screenshot button clicked");
+            // Simplified version without actual screenshot functionality
+            alert("Screenshot feature would capture the current view");
+        });
+    }
     
     // View toggle buttons
-    galleryViewButton.addEventListener('click', () => toggleGalleryView('grid'));
-    listViewButton.addEventListener('click', () => toggleGalleryView('list'));
-}
-
-/**
- * Load saved preferences from local storage
- */
-function loadPreferences() {
-    // Theme preference
-    const darkMode = loadFromLocalStorage('darkMode');
-    if (darkMode) {
-        document.getElementById('theme-stylesheet').disabled = !darkMode;
-        updateThemeToggleIcon(darkMode);
+    if (galleryViewButton) {
+        galleryViewButton.addEventListener('click', () => toggleGalleryView('grid'));
     }
     
-    // Filter preferences
-    const savedSubreddit = loadFromLocalStorage('subreddit');
-    if (savedSubreddit) {
-        currentSubreddit = savedSubreddit;
-        subredditFilter.value = savedSubreddit;
+    if (listViewButton) {
+        listViewButton.addEventListener('click', () => toggleGalleryView('list'));
     }
-    
-    const savedCount = loadFromLocalStorage('count');
-    if (savedCount) {
-        currentCount = savedCount;
-        countFilter.value = savedCount;
-    }
-    
-    const savedSort = loadFromLocalStorage('sort');
-    if (savedSort) {
-        currentSort = savedSort;
-        sortFilter.value = savedSort;
-    }
-    
-    const savedFormat = loadFromLocalStorage('format');
-    if (savedFormat) {
-        currentFormat = savedFormat;
-        formatFilter.value = savedFormat;
-    }
-    
-    // View preference
-    const viewMode = loadFromLocalStorage('viewMode') || 'grid';
-    toggleGalleryView(viewMode, false);
 }
 
 /**
@@ -126,13 +100,11 @@ function loadPreferences() {
  */
 function toggleTheme() {
     const themeStylesheet = document.getElementById('theme-stylesheet');
-    const isDarkMode = !themeStylesheet.disabled;
-    
-    themeStylesheet.disabled = isDarkMode;
-    updateThemeToggleIcon(isDarkMode);
-    
-    // Save preference
-    saveToLocalStorage('darkMode', isDarkMode);
+    if (themeStylesheet) {
+        const isDarkMode = !themeStylesheet.disabled;
+        themeStylesheet.disabled = isDarkMode;
+        updateThemeToggleIcon(isDarkMode);
+    }
 }
 
 /**
@@ -140,13 +112,17 @@ function toggleTheme() {
  * @param {boolean} isDarkMode - Whether dark mode is active
  */
 function updateThemeToggleIcon(isDarkMode) {
+    if (!themeToggle) return;
+    
     const icon = themeToggle.querySelector('i');
-    if (isDarkMode) {
-        icon.classList.remove('bi-sun');
-        icon.classList.add('bi-moon');
-    } else {
-        icon.classList.remove('bi-moon');
-        icon.classList.add('bi-sun');
+    if (icon) {
+        if (isDarkMode) {
+            icon.classList.remove('bi-sun');
+            icon.classList.add('bi-moon');
+        } else {
+            icon.classList.remove('bi-moon');
+            icon.classList.add('bi-sun');
+        }
     }
 }
 
@@ -154,12 +130,13 @@ function updateThemeToggleIcon(isDarkMode) {
  * Handle filter changes
  */
 function handleFilterChange() {
-    currentSubreddit = subredditFilter.value;
-    currentCount = parseInt(countFilter.value);
+    if (subredditFilter) {
+        currentSubreddit = subredditFilter.value;
+    }
     
-    // Save preferences
-    saveToLocalStorage('subreddit', currentSubreddit);
-    saveToLocalStorage('count', currentCount);
+    if (countFilter) {
+        currentCount = parseInt(countFilter.value);
+    }
     
     // Reload data
     loadMemeData();
@@ -169,10 +146,9 @@ function handleFilterChange() {
  * Handle sort changes
  */
 function handleSortChange() {
-    currentSort = sortFilter.value;
-    
-    // Save preference
-    saveToLocalStorage('sort', currentSort);
+    if (sortFilter) {
+        currentSort = sortFilter.value;
+    }
     
     // Apply sort to existing data
     applyFiltersAndSort();
@@ -183,10 +159,9 @@ function handleSortChange() {
  * Handle format filter changes
  */
 function handleFormatChange() {
-    currentFormat = formatFilter.value;
-    
-    // Save preference
-    saveToLocalStorage('format', currentFormat);
+    if (formatFilter) {
+        currentFormat = formatFilter.value;
+    }
     
     // Apply filter to existing data
     applyFiltersAndSort();
@@ -196,16 +171,16 @@ function handleFormatChange() {
 /**
  * Toggle between grid and list view for gallery
  * @param {string} mode - View mode ('grid' or 'list')
- * @param {boolean} updateUI - Whether to update UI elements
  */
-function toggleGalleryView(mode, updateUI = true) {
+function toggleGalleryView(mode) {
     const galleryContainer = document.getElementById('meme-gallery');
+    if (!galleryContainer) return;
     
     if (mode === 'list') {
         galleryContainer.classList.remove('row-cols-md-3', 'row-cols-lg-4');
         galleryContainer.classList.add('row-cols-1');
         
-        if (updateUI) {
+        if (listViewButton && galleryViewButton) {
             galleryViewButton.classList.remove('active');
             listViewButton.classList.add('active');
         }
@@ -213,22 +188,18 @@ function toggleGalleryView(mode, updateUI = true) {
         galleryContainer.classList.remove('row-cols-1');
         galleryContainer.classList.add('row-cols-md-3', 'row-cols-lg-4');
         
-        if (updateUI) {
+        if (listViewButton && galleryViewButton) {
             listViewButton.classList.remove('active');
             galleryViewButton.classList.add('active');
         }
     }
-    
-    // Save preference
-    saveToLocalStorage('viewMode', mode);
 }
 
 /**
- * Load meme data from API
+ * Load meme data
  */
 async function loadMemeData() {
     try {
-        hideStatus(); // Add this line
         const data = await fetchMemes(currentSubreddit, currentCount);
         
         if (data && data.memes && data.memes.length > 0) {
@@ -239,15 +210,11 @@ async function loadMemeData() {
             
             // Update dashboard
             updateDashboard();
-            
-            // Show success message
-            showStatus(`Successfully loaded ${data.memes.length} memes from r/${currentSubreddit}`); // Add this line
         }
     } catch (error) {
         console.error('Error loading meme data:', error);
     }
 }
-
 
 /**
  * Load more memes
@@ -258,17 +225,13 @@ async function loadMoreMemes() {
         
         if (data && data.memes && data.memes.length > 0) {
             // Add new memes to existing collection
-            const newMemes = data.memes.filter(newMeme => 
-                !allMemes.some(existingMeme => existingMeme.postLink === newMeme.postLink)
-            );
-            
-            allMemes = [...allMemes, ...newMemes];
+            allMemes = [...allMemes, ...data.memes];
             
             // Apply filters and sort
             applyFiltersAndSort();
             
-            // Update gallery only (append mode)
-            populateMemeGallery(filteredMemes, true);
+            // Update dashboard
+            updateDashboard();
         }
     } catch (error) {
         console.error('Error loading more memes:', error);
@@ -292,10 +255,6 @@ function applyFiltersAndSort() {
     // Apply sort
     if (currentSort === 'ups') {
         filteredMemes.sort((a, b) => b.ups - a.ups);
-    } else if (currentSort === 'date') {
-        // Note: The API doesn't provide creation date, so this is a placeholder
-        // In a real implementation, we would sort by date if available
-        filteredMemes.sort((a, b) => b.ups - a.ups);
     }
 }
 
@@ -303,19 +262,102 @@ function applyFiltersAndSort() {
  * Update dashboard with current data
  */
 function updateDashboard() {
-    // Update charts
-    updateTrendChart(filteredMemes);
-    updateFormatChart(filteredMemes);
-    updateSentimentChart(filteredMemes);
-    
-    // Update trend spotlight
-    populateTrendSpotlight(filteredMemes);
-    
-    // Update popularity scores
-    populatePopularityScores(filteredMemes);
+    console.log("Updating dashboard with", filteredMemes.length, "memes");
     
     // Update gallery
     populateMemeGallery(filteredMemes);
+    
+    // Update other components if they exist
+    if (typeof updateTrendChart === 'function') {
+        updateTrendChart(filteredMemes);
+    }
+    
+    if (typeof updateFormatChart === 'function') {
+        updateFormatChart(filteredMemes);
+    }
+    
+    if (typeof updateSentimentChart === 'function') {
+        updateSentimentChart(filteredMemes);
+    }
+    
+    if (typeof populateTrendSpotlight === 'function') {
+        populateTrendSpotlight(filteredMemes);
+    }
+    
+    if (typeof populatePopularityScores === 'function') {
+        populatePopularityScores(filteredMemes);
+    }
+}
+
+/**
+ * Populate meme gallery with filtered memes
+ * @param {Array} memes - Array of meme objects
+ * @param {boolean} append - Whether to append to existing gallery
+ */
+function populateMemeGallery(memes, append = false) {
+    const galleryContainer = document.getElementById('meme-gallery');
+    if (!galleryContainer) return;
+    
+    if (!append) {
+        galleryContainer.innerHTML = '';
+    }
+    
+    memes.forEach(meme => {
+        const memeCard = document.createElement('div');
+        memeCard.className = 'col meme-item mb-4';
+        
+        memeCard.innerHTML = `
+            <div class="card h-100 shadow-sm">
+                <img src="${meme.url}" class="card-img-top gallery-img" alt="${meme.title}">
+                <div class="card-body">
+                    <h5 class="card-title">${meme.title}</h5>
+                    <p class="card-text">
+                        <small class="text-muted">r/${meme.subreddit} • ${meme.ups} upvotes</small>
+                    </p>
+                </div>
+            </div>
+        `;
+        
+        memeCard.addEventListener('click', () => {
+            showMemeModal(meme);
+        });
+        
+        galleryContainer.appendChild(memeCard);
+    });
+    
+    if (memes.length === 0) {
+        galleryContainer.innerHTML = `
+            <div class="col-12 text-center py-5">
+                <p class="text-muted">No memes found matching your criteria.</p>
+            </div>
+        `;
+    }
+}
+
+/**
+ * Show meme details in modal
+ * @param {Object} meme - Meme object
+ */
+function showMemeModal(meme) {
+    const modalTitle = document.getElementById('meme-modal-title');
+    const modalBody = document.getElementById('meme-modal-body');
+    const modal = new bootstrap.Modal(document.getElementById('meme-modal'));
+    
+    if (!modalTitle || !modalBody) return;
+    
+    modalTitle.textContent = meme.title;
+    
+    modalBody.innerHTML = `
+        <img src="${meme.url}" class="img-fluid mb-3" alt="${meme.title}">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <span class="badge bg-primary">r/${meme.subreddit}</span>
+            <span><i class="bi bi-arrow-up-circle"></i> ${meme.ups} upvotes</span>
+        </div>
+        <p>Posted by u/${meme.author}</p>
+        <a href="${meme.postLink}" target="_blank" class="btn btn-outline-primary">View on Reddit</a>
+    `;
+    
+    modal.show();
 }
 
 /**
@@ -327,42 +369,38 @@ function exportToCSV() {
         return;
     }
     
+    if (typeof convertToCSV !== 'function' || typeof downloadCSV !== 'function') {
+        alert('Export functionality not available');
+        return;
+    }
+    
     const csvContent = convertToCSV(filteredMemes);
-    const filename = `meme-data-${currentSubreddit}-${getCurrentDate()}.csv`;
+    const filename = `meme-data-${currentSubreddit}-${new Date().toISOString().split('T')[0]}.csv`;
     
     downloadCSV(csvContent, filename);
 }
 
-// Initialize app when DOM is loaded
 /**
- * Show welcome message for first-time users
+ * Detect meme format from URL
+ * @param {string} url - Meme URL
+ * @returns {string} - Format (image, gif, video)
  */
-function showWelcomeMessage() {
-    if (!loadFromLocalStorage('welcomeShown')) {
-        const welcomeHtml = `
-            <div class="alert alert-info alert-dismissible fade show" role="alert">
-                <h4 class="alert-heading">Welcome to the Meme Trend Dashboard!</h4>
-                <p>This dashboard helps you track trending memes for your satirical commentary:</p>
-                <ul>
-                    <li>Use the filters above to select which memes to view</li>
-                    <li>Click the refresh button to load new memes</li>
-                    <li>Click on any meme to see it in detail</li>
-                </ul>
-                <p>Start by selecting a subreddit and exploring the trending memes!</p>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        `;
-        
-        const container = document.querySelector('.container');
-        const firstRow = container.querySelector('.row');
-        const welcomeDiv = document.createElement('div');
-        welcomeDiv.className = 'row mb-4';
-        welcomeDiv.innerHTML = `<div class="col-md-12">${welcomeHtml}</div>`;
-        
-        container.insertBefore(welcomeDiv, firstRow);
-        
-        saveToLocalStorage('welcomeShown', true);
+function detectMemeFormat(url) {
+    if (!url) return 'unknown';
+    
+    const lowercaseUrl = url.toLowerCase();
+    
+    if (lowercaseUrl.endsWith('.gif')) {
+        return 'gif';
+    } else if (lowercaseUrl.endsWith('.mp4') || lowercaseUrl.endsWith('.webm')) {
+        return 'video';
+    } else if (lowercaseUrl.endsWith('.jpg') || lowercaseUrl.endsWith('.jpeg') || 
+               lowercaseUrl.endsWith('.png') || lowercaseUrl.endsWith('.webp')) {
+        return 'image';
+    } else {
+        return 'image'; // Default to image
     }
 }
 
+// Initialize app when DOM is loaded
 document.addEventListener('DOMContentLoaded', initApp);

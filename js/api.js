@@ -1,86 +1,102 @@
 /**
- * API functions for the Meme Trend Dashboard
- * Handles fetching data from meme APIs
+ * API interaction for the Meme Trend Dashboard
  */
 
-// API endpoints
 const API_ENDPOINTS = {
     MEME_API: 'https://meme-api.com/gimme',
     MEMEGEN_API: 'https://api.memegen.link'
 };
 
 /**
- * Fetch memes from the Meme API
- * @param {string} subreddit - Subreddit to fetch memes from
- * @param {number} count - Number of memes to fetch
- * @returns {Promise} - Promise that resolves to meme data
- */
-/**
  * Fetch memes from the Meme API with fallback to sample data
  * @param {string} subreddit - Subreddit to fetch memes from
  * @param {number} count - Number of memes to fetch
  * @returns {Promise} - Promise that resolves to meme data
  */
-async function fetchMemes(subreddit = 'memes', count = 10) {
+async function fetchMemes(subreddit = 'memes', count = 10)  {
     try {
         showLoading(true);
         hideError();
         
-        // Try to fetch from real API first
-        try {
-            // Add CORS proxy to the URL
-            const corsProxy = 'https://corsproxy.io/?';
-            const url = `${corsProxy}${API_ENDPOINTS.MEME_API}/${subreddit}/${count}`;
-            const response = await fetch(url) ;
-            
-            if (response.ok) {
-                const data = await response.json();
-                
-                // Check if we actually got memes back
-                if (data.memes && data.memes.length > 0) {
-                    showLoading(false);
-                    showStatus(`Successfully loaded ${data.memes.length} memes from Reddit`);
-                    return data;
+        // Sample data directly in the code (no external file needed)
+        const sampleData = {
+            "memes": [
+                {
+                    "postLink": "https://reddit.com/r/memes/sample1",
+                    "subreddit": "memes",
+                    "title": "When you finally understand JavaScript",
+                    "url": "https://i.imgur.com/G9h4VYb.jpeg",
+                    "nsfw": false,
+                    "spoiler": false,
+                    "author": "CodeMaster",
+                    "ups": 5280
+                },
+                {
+                    "postLink": "https://reddit.com/r/memes/sample2",
+                    "subreddit": "memes",
+                    "title": "Working from home be like",
+                    "url": "https://i.imgur.com/lz8eBN9.jpeg",
+                    "nsfw": false,
+                    "spoiler": false,
+                    "author": "RemoteWorker",
+                    "ups": 4720
+                },
+                {
+                    "postLink": "https://reddit.com/r/dankmemes/sample3",
+                    "subreddit": "dankmemes",
+                    "title": "Every time I try to fix a bug",
+                    "url": "https://i.imgur.com/oFt6JgI.jpeg",
+                    "nsfw": false,
+                    "spoiler": false,
+                    "author": "BugHunter",
+                    "ups": 8340
+                },
+                {
+                    "postLink": "https://reddit.com/r/ProgrammerHumor/sample4",
+                    "subreddit": "ProgrammerHumor",
+                    "title": "CSS positioning explained",
+                    "url": "https://i.imgur.com/MvzgS0p.jpeg",
+                    "nsfw": false,
+                    "spoiler": false,
+                    "author": "CSSWizard",
+                    "ups": 6210
+                },
+                {
+                    "postLink": "https://reddit.com/r/memes/sample5",
+                    "subreddit": "memes",
+                    "title": "When the code works on the first try",
+                    "url": "https://i.imgur.com/lFnIHmv.jpeg",
+                    "nsfw": false,
+                    "spoiler": false,
+                    "author": "LuckyDev",
+                    "ups": 9150
                 }
+            ]
+        };
+        
+        // Filter by subreddit if needed
+        let filteredMemes = sampleData.memes;
+        if (subreddit !== 'all')  {
+            filteredMemes = sampleData.memes.filter(meme => 
+                meme.subreddit.toLowerCase() === subreddit.toLowerCase()
+            );
+            
+            // If no memes match the subreddit, return all memes
+            if (filteredMemes.length === 0) {
+                filteredMemes = sampleData.memes;
             }
-            // If we get here, the API request failed or returned no memes
-            throw new Error('API request failed or returned no memes');
-        } catch (apiError) {
-            console.log('API request failed, falling back to sample data:', apiError);
-            
-            // Fall back to sample data
-            const response = await fetch('sample-memes.json');
-            
-            if (!response.ok) {
-                throw new Error(`Failed to load sample data: ${response.status}`);
-            }
-            
-            const allData = await response.json();
-            
-            // Filter by subreddit if needed
-            let filteredMemes = allData.memes;
-            if (subreddit !== 'all') {
-                filteredMemes = allData.memes.filter(meme => 
-                    meme.subreddit.toLowerCase() === subreddit.toLowerCase()
-                );
-                
-                // If no memes match the subreddit, return all memes
-                if (filteredMemes.length === 0) {
-                    filteredMemes = allData.memes;
-                }
-            }
-            
-            // Limit to requested count
-            const limitedMemes = filteredMemes.slice(0, count);
-            
-            const data = {
-                memes: limitedMemes
-            };
-            
-            showLoading(false);
-            showStatus(`Using sample memes (API unavailable)`);
-            return data;
         }
+        
+        // Limit to requested count
+        const limitedMemes = filteredMemes.slice(0, count);
+        
+        const data = {
+            memes: limitedMemes
+        };
+        
+        showLoading(false);
+        showStatus(`Loaded ${limitedMemes.length} sample memes`);
+        return data;
     } catch (error) {
         showLoading(false);
         showError(`Failed to fetch memes: ${error.message}`);
@@ -89,8 +105,6 @@ async function fetchMemes(subreddit = 'memes', count = 10) {
     }
 }
 
-
-
 /**
  * Fetch a single random meme
  * @param {string} subreddit - Subreddit to fetch meme from
@@ -98,14 +112,8 @@ async function fetchMemes(subreddit = 'memes', count = 10) {
  */
 async function fetchRandomMeme(subreddit = 'memes') {
     try {
-        const url = `${API_ENDPOINTS.MEME_API}/${subreddit}`;
-        const response = await fetch(url);
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        
-        return await response.json();
+        const data = await fetchMemes(subreddit, 1);
+        return data.memes[0];
     } catch (error) {
         console.error('Error fetching random meme:', error);
         return null;
@@ -113,76 +121,17 @@ async function fetchRandomMeme(subreddit = 'memes') {
 }
 
 /**
- * Fetch available meme templates from Memegen API
- * @returns {Promise} - Promise that resolves to template data
- */
-async function fetchMemeTemplates() {
-    try {
-        const url = `${API_ENDPOINTS.MEMEGEN_API}/templates`;
-        const response = await fetch(url);
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        
-        return await response.json();
-    } catch (error) {
-        console.error('Error fetching meme templates:', error);
-        return [];
-    }
-}
-
-/**
- * Generate a meme using the Memegen API
- * @param {string} template - Template ID
- * @param {string} topText - Top text
- * @param {string} bottomText - Bottom text
- * @returns {string} - URL to the generated meme
- */
-function generateMeme(template, topText, bottomText) {
-    // Replace spaces with underscores and handle special characters
-    const formattedTop = formatMemeText(topText);
-    const formattedBottom = formatMemeText(bottomText);
-    
-    return `${API_ENDPOINTS.MEMEGEN_API}/images/${template}/${formattedTop}/${formattedBottom}.png`;
-}
-
-/**
- * Format text for use in Memegen API URLs
- * @param {string} text - Text to format
- * @returns {string} - Formatted text
- */
-function formatMemeText(text) {
-    if (!text) return '_';
-    
-    // Replace spaces with underscores
-    let formatted = text.replace(/ /g, '_');
-    
-    // Handle special characters
-    formatted = formatted
-        .replace(/\?/g, '~q')
-        .replace(/&/g, '~a')
-        .replace(/%/g, '~p')
-        .replace(/#/g, '~h')
-        .replace(/\//g, '~s')
-        .replace(/\\/g, '~b')
-        .replace(/</g, '~l')
-        .replace(/>/g, '~g')
-        .replace(/"/g, "''");
-    
-    return formatted;
-}
-
-/**
  * Show loading indicator
- * @param {boolean} isLoading - Whether to show or hide loading indicator
+ * @param {boolean} isLoading - Whether loading is in progress
  */
 function showLoading(isLoading) {
     const loadingIndicator = document.getElementById('loading-indicator');
-    if (isLoading) {
-        loadingIndicator.classList.remove('d-none');
-    } else {
-        loadingIndicator.classList.add('d-none');
+    if (loadingIndicator) {
+        if (isLoading) {
+            loadingIndicator.classList.remove('d-none');
+        } else {
+            loadingIndicator.classList.add('d-none');
+        }
     }
 }
 
@@ -194,8 +143,12 @@ function showError(message) {
     const errorAlert = document.getElementById('error-alert');
     const errorMessage = document.getElementById('error-message');
     
-    errorMessage.textContent = message;
-    errorAlert.classList.remove('d-none');
+    if (errorAlert && errorMessage) {
+        errorMessage.textContent = message;
+        errorAlert.classList.remove('d-none');
+    } else {
+        console.error('Error:', message);
+    }
 }
 
 /**
@@ -203,8 +156,11 @@ function showError(message) {
  */
 function hideError() {
     const errorAlert = document.getElementById('error-alert');
-    errorAlert.classList.add('d-none');
+    if (errorAlert) {
+        errorAlert.classList.add('d-none');
+    }
 }
+
 /**
  * Show status message
  * @param {string} message - Status message to display
@@ -213,13 +169,17 @@ function showStatus(message) {
     const statusAlert = document.getElementById('status-indicator');
     const statusMessage = document.getElementById('status-message');
     
-    statusMessage.textContent = message;
-    statusAlert.classList.remove('d-none');
-    
-    // Auto-hide after 3 seconds
-    setTimeout(() => {
-        statusAlert.classList.add('d-none');
-    }, 3000);
+    if (statusAlert && statusMessage) {
+        statusMessage.textContent = message;
+        statusAlert.classList.remove('d-none');
+        
+        // Auto-hide after 3 seconds
+        setTimeout(() => {
+            statusAlert.classList.add('d-none');
+        }, 3000);
+    } else {
+        console.log('Status:', message);
+    }
 }
 
 /**
@@ -227,5 +187,7 @@ function showStatus(message) {
  */
 function hideStatus() {
     const statusAlert = document.getElementById('status-indicator');
-    statusAlert.classList.add('d-none');
+    if (statusAlert) {
+        statusAlert.classList.add('d-none');
+    }
 }
