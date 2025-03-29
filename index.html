@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meme Trend Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/dark-mode.css" id="theme-stylesheet" disabled>
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <span class="fw-bold text-primary">Meme Trend Dashboard</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#trending">Trending</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#analytics">Analytics</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#gallery">Gallery</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#about">About</a>
+                    </li>
+                </ul>
+                <div class="d-flex">
+                    <button id="theme-toggle" class="btn btn-outline-secondary me-2">
+                        <i class="bi bi-moon"></i>
+                    </button>
+                    <button id="refresh-data" class="btn btn-primary">
+                        <i class="bi bi-arrow-clockwise"></i> Refresh
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Filters Section -->
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">Filters</h5>
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <label for="subreddit-filter" class="form-label">Subreddit</label>
+                                <select id="subreddit-filter" class="form-select">
+                                    <option value="memes" selected>r/memes</option>
+                                    <option value="dankmemes">r/dankmemes</option>
+                                    <option value="me_irl">r/me_irl</option>
+                                    <option value="wholesomememes">r/wholesomememes</option>
+                                    <option value="ProgrammerHumor">r/ProgrammerHumor</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="count-filter" class="form-label">Count</label>
+                                <select id="count-filter" class="form-select">
+                                    <option value="5">5</option>
+                                    <option value="10" selected>10</option>
+                                    <option value="25">25</option>
+                                    <option value="50">50</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="sort-filter" class="form-label">Sort By</label>
+                                <select id="sort-filter" class="form-select">
+                                    <option value="ups" selected>Upvotes</option>
+                                    <option value="date">Date</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="format-filter" class="form-label">Format</label>
+                                <select id="format-filter" class="form-select">
+                                    <option value="all" selected>All</option>
+                                    <option value="image">Image</option>
+                                    <option value="gif">GIF</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div id="loading-indicator" class="text-center my-5 d-none">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">Loading meme data...</p>
+        </div>
+
+        <!-- Error Alert -->
+        <div id="error-alert" class="alert alert-danger d-none" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <span id="error-message">Unable to fetch meme data. Please try again later.</span>
+        </div>
+
+        <!-- Trending Section -->
+        <section id="trending" class="mb-5">
+            <h2 class="mb-4">Trending Memes</h2>
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">Popularity Over Time</h5>
+                            <canvas id="trend-chart" height="300"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">Format Distribution</h5>
+                            <canvas id="format-chart" height="300"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-4">
+                <div class="col-md-12">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">Trend Spotlight</h5>
+                            <div id="trend-spotlight" class="row g-4">
+                                <!-- Trend spotlight content will be inserted here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Analytics Section -->
+        <section id="analytics" class="mb-5">
+            <h2 class="mb-4">Analytics</h2>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">Popularity Score</h5>
+                            <div id="popularity-scores" class="mt-3">
+                                <!-- Popularity scores will be inserted here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">Sentiment Analysis</h5>
+                            <canvas id="sentiment-chart" height="300"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Gallery Section -->
+        <section id="gallery" class="mb-5">
+            <h2 class="mb-4">Meme Gallery</h2>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="card-title mb-0">Browse Memes</h5>
+                                <div>
+                                    <button id="gallery-view-btn" class="btn btn-sm btn-outline-primary active">
+                                        <i class="bi bi-grid-3x3-gap"></i> Grid
+                                    </button>
+                                    <button id="list-view-btn" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-list"></i> List
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="meme-gallery" class="row g-4">
+                                <!-- Meme gallery content will be inserted here -->
+                            </div>
+                            <div class="text-center mt-4">
+                                <button id="load-more" class="btn btn-outline-primary">
+                                    Load More
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" class="mb-5">
+            <h2 class="mb-4">About</h2>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">About This Dashboard</h5>
+                            <p>
+                                This Meme Trend Dashboard is designed to track and analyze viral meme trends across social media platforms to inform satirical cultural commentary. The dashboard provides quick insights into what's trending, why it's spreading, and how it's evolving, allowing for snapshot analysis that can inspire creative work.
+                            </p>
+                            <p>
+                                <strong>Data Sources:</strong> This dashboard uses the <a href="https://github.com/D3vd/Meme_Api" target="_blank">Meme_Api</a> to fetch trending memes from Reddit subreddits.
+                            </p>
+                            <p>
+                                <strong>Features:</strong>
+                            </p>
+                            <ul>
+                                <li>Trend visualization with timeline graphs and format distribution</li>
+                                <li>Analytics metrics including popularity scores and sentiment analysis</li>
+                                <li>Interactive gallery view for browsing meme content</li>
+                                <li>Basic categorization and filtering options</li>
+                            </ul>
+                            <p class="mt-4">
+                                <small class="text-muted">Created in collaboration with Not Liz AI</small>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer class="bg-white py-4 mt-5 border-top">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <p class="mb-0">Created in collaboration with Not Liz AI</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <button id="export-csv" class="btn btn-sm btn-outline-secondary me-2">
+                        <i class="bi bi-file-earmark-arrow-down"></i> Export CSV
+                    </button>
+                    <button id="take-screenshot" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-camera"></i> Screenshot
+                    </button>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Meme Modal -->
+    <div class="modal fade" id="meme-modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="meme-modal-title">Meme Title</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <img id="meme-modal-image" src="" alt="Meme" class="img-fluid mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span id="meme-modal-subreddit" class="badge bg-primary">r/subreddit</span>
+                        <span id="meme-modal-author">Posted by u/username</span>
+                        <span id="meme-modal-ups"><i class="bi bi-arrow-up"></i> 0</span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <a id="meme-modal-link" href="#" target="_blank" class="btn btn-primary">View on Reddit</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/charts.js"></script>
+    <script src="js/filters.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
