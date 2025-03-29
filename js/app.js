@@ -26,7 +26,7 @@ const listViewButton = document.getElementById('list-view-btn');
 /**
  * Initialize the application
  */
-f/**
+/**
  * Show status message
  * @param {string} message - Status message to display
  */
