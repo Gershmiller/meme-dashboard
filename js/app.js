@@ -26,19 +26,31 @@ const listViewButton = document.getElementById('list-view-btn');
 /**
  * Initialize the application
  */
-function initApp() {
-    // Initialize charts
-    initCharts();
+f/**
+ * Show status message
+ * @param {string} message - Status message to display
+ */
+function showStatus(message) {
+    const statusAlert = document.getElementById('status-indicator');
+    const statusMessage = document.getElementById('status-message');
     
-    // Set up event listeners
-    setupEventListeners();
+    statusMessage.textContent = message;
+    statusAlert.classList.remove('d-none');
     
-    // Load saved preferences
-    loadPreferences();
-    
-    // Load initial data
-    loadMemeData();
+    // Auto-hide after 3 seconds
+    setTimeout(() => {
+        statusAlert.classList.add('d-none');
+    }, 3000);
 }
+
+/**
+ * Hide status message
+ */
+function hideStatus() {
+    const statusAlert = document.getElementById('status-indicator');
+    statusAlert.classList.add('d-none');
+}
+
 
 /**
  * Set up event listeners
@@ -216,6 +228,7 @@ function toggleGalleryView(mode, updateUI = true) {
  */
 async function loadMemeData() {
     try {
+        hideStatus(); // Add this line
         const data = await fetchMemes(currentSubreddit, currentCount);
         
         if (data && data.memes && data.memes.length > 0) {
@@ -226,11 +239,15 @@ async function loadMemeData() {
             
             // Update dashboard
             updateDashboard();
+            
+            // Show success message
+            showStatus(`Successfully loaded ${data.memes.length} memes from r/${currentSubreddit}`); // Add this line
         }
     } catch (error) {
         console.error('Error loading meme data:', error);
     }
 }
+
 
 /**
  * Load more memes
@@ -317,4 +334,35 @@ function exportToCSV() {
 }
 
 // Initialize app when DOM is loaded
+/**
+ * Show welcome message for first-time users
+ */
+function showWelcomeMessage() {
+    if (!loadFromLocalStorage('welcomeShown')) {
+        const welcomeHtml = `
+            <div class="alert alert-info alert-dismissible fade show" role="alert">
+                <h4 class="alert-heading">Welcome to the Meme Trend Dashboard!</h4>
+                <p>This dashboard helps you track trending memes for your satirical commentary:</p>
+                <ul>
+                    <li>Use the filters above to select which memes to view</li>
+                    <li>Click the refresh button to load new memes</li>
+                    <li>Click on any meme to see it in detail</li>
+                </ul>
+                <p>Start by selecting a subreddit and exploring the trending memes!</p>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        `;
+        
+        const container = document.querySelector('.container');
+        const firstRow = container.querySelector('.row');
+        const welcomeDiv = document.createElement('div');
+        welcomeDiv.className = 'row mb-4';
+        welcomeDiv.innerHTML = `<div class="col-md-12">${welcomeHtml}</div>`;
+        
+        container.insertBefore(welcomeDiv, firstRow);
+        
+        saveToLocalStorage('welcomeShown', true);
+    }
+}
+
 document.addEventListener('DOMContentLoaded', initApp);

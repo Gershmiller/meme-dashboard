@@ -28,6 +28,12 @@ async function fetchMemes(subreddit = 'memes', count = 10) {
         }
         
         const data = await response.json();
+        
+        // Check if we actually got memes back
+        if (!data.memes || data.memes.length === 0) {
+            throw new Error('No memes found. Try a different subreddit.');
+        }
+        
         showLoading(false);
         return data;
     } catch (error) {
@@ -37,6 +43,7 @@ async function fetchMemes(subreddit = 'memes', count = 10) {
         return { memes: [] };
     }
 }
+
 
 /**
  * Fetch a single random meme
@@ -151,4 +158,28 @@ function showError(message) {
 function hideError() {
     const errorAlert = document.getElementById('error-alert');
     errorAlert.classList.add('d-none');
+}
+/**
+ * Show status message
+ * @param {string} message - Status message to display
+ */
+function showStatus(message) {
+    const statusAlert = document.getElementById('status-indicator');
+    const statusMessage = document.getElementById('status-message');
+    
+    statusMessage.textContent = message;
+    statusAlert.classList.remove('d-none');
+    
+    // Auto-hide after 3 seconds
+    setTimeout(() => {
+        statusAlert.classList.add('d-none');
+    }, 3000);
+}
+
+/**
+ * Hide status message
+ */
+function hideStatus() {
+    const statusAlert = document.getElementById('status-indicator');
+    statusAlert.classList.add('d-none');
 }
